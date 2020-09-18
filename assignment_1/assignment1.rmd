@@ -3,86 +3,149 @@ output:
   html_document: default
   pdf_document: default
 ---
-This is a template with format instructions for Assignments in the Bayesian Data Analysis course at Aalto University. R markdown is a convenient way of writing exercise reports by combining text and R code using markdown syntax. To create your assignment, remove the formatting instructions and use this file as a template.
-
-More information on how to use markdown, see [this](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) and more information on R markdown can be found [here](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
-
-Also, _R Markdown: The Definite Guide_, an extensive book on R Markdown can be found [here](https://bookdown.org/yihui/rmarkdown/).
-
-**Note** The report should be anonymous and submitted to [peergrade.io](peergrade.io) as `assignmentX.pdf`. If you have problem with creating a PDF file directly from R markdown, start by creating an HTML file and the just print the HTML to a PDF. 
-
 
 ```{r setup, include=FALSE}
 # This chunk just sets echo = TRUE as default (i.e. print all code)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Loaded packages
+# Exercise 1) Basic probability theory notation and terms
+* **probability**: represents how likely an event is to happen
+* **probability mass**: the likelihood of a discrete event to happen
+* **probability density**: the likelihood of a continuous random variable to lie within a certain range of values.
+* **probability mass function (pmf)**: function that describes the probability of discrete random variable.
+* **probability density function (pdf)**: function that describes the relative likelihood of a random continuous variable being equal to any given sample in the sample space.
+* **discrete probability distribution**: probability distribution that describes the likelihood of the values in a discrete random variable. 
+* **continuous probability distribution**: probability distribution that describes the possible values of a continuous random variable
+* **cumulative distribution function (cdf)**: represents the probability that a given random variable will take a value of less than or equal to a certain value.
+* **likelihood**: $p(y|\theta)$ as a function of $\theta$ given fixed $y$ provides information about the epistemic uncertainty observed from the data.
 
-Below are examples of how to load packages that are used in the assignment
-
-```{r, echo=TRUE}
-# To install aaltobda, see the General information in the assignment.
-library(aaltobda)
+# Exercise 2) Basic computer skills
+## a) 
+Density function of Beta-distribution, with mean $\mu$ = 0.2 and variance $\sigma^2$ = 0.01.
+```{r, fig.height=4, fig.width=4}
+mu <- 0.2
+var <- 0.01
+alpha <- mu * (((mu*(1-mu))/var) - 1)
+beta <- (alpha*(1-mu))/mu
+x <- seq(0, 1, length=100)
+y <- dbeta(x, alpha, beta)
+plot(x, y)
 ```
 
-# Including source code
+## b)
+Histogram of a sample of 1000 random numbers from the above distribution.
+```{r, fig.height=4, fig.width=4}
+n <- 1000
+sample <- rbeta(n, alpha, beta)
+hist(sample)
+```
 
-In general, all code needed to produce the essential parts needs to be included, so that it is possible to see, for peer reviewers, where errors may have happened
+As we can see, the histogram of the samples that were drawn from the beta distribution follows the shape of the density function above.
 
-You can always look at the open rubrics to see how and what is asked for in each exercise.
+## c)
+Sample mean and variance from the drawn sample
+```{r}
+mu_bar <- mean(sample)
+var_bar <- var(sample)
+print(paste("Sample mean:", format(mu_bar)))
+print(paste("Sample variance:", format(var_bar)))
+```
+As we can see both values are approximately the same as the true values (i.e. $\mu$ = 0.2 and $\sigma^2$ = 0.01).
 
-Try to avoid printing an excessive amount of code and think about what is essential for showing how did you get the result.
+## d)
+Central 95% probability interval of the distribution from the
+drawn samples
+```{r}
+print(paste("The central 95% probability interval of the distribution from the drawn samples is", format(quantile(sample, probs = 0.95))))
+```
 
-Write clear code. The code is also part of your report and clarity of the report affects your score. If the code is not self-explanatory, add comments. In a notebook, you can interleave explaining text and code.
+# Exercise 3) Bayes' theorem
+The facts given by the researchers are the following:
 
-If in doubt additional source code can be included in an appendix. 
+* $P(positive|cancer)=0.98$,
+* $P(negative|healthy) = 0.96$,
+* $P(cancer)=0.001$
 
-# Format instructions
+To simplify notation, we assume that not cancer equals being healthy.
+In order to know the recommendation that we would issue, we must compute what is the probability that a person has cancer given that the test predicts a positive result.
+We can compute this using the Bayes' rule:
+\begin{align}
+P(cancer|positive) & =\frac{P(positive|cancer)P(cancer)}{P(positive)}\\
+& = \frac{P(positive|cancer)P(cancer)}{P(positive|cancer)P(cancer)+P(positive|healthy)P(healthy)}\\
+& = \frac{0.001*0.98}{0.98*0.001+0.04*0.999}\\
+& = 0.0239
+\end{align}
+where $$P(positive|healthy)=1-P(negative|healthy)=1-0.96=0.04$$ and $$P(healthy)=1-P(cancer)=1-0.001=0.999.$$
 
-All exercises in the assignment should start with header 1 fully specifying that it is exercise X, as:
+Thus, we now know that for a random patient that is examined with this method, there is only a 2.4% probability of the patient actually having cancer when the test gives a positive result.
+This is very alarming because the consequences of a positive test are very drastic: medication, surgery or more testing.
+That would mean that most of the patients that would be given these treatments would not actually need them.
 
-# Exercise 1)
+Based on this information, I would recommend decreasing the number of false positives (i.e. healthy predicted as positive), because that would increase $P(negative|healthy)$.
+This would mean that $P(positive|healthy)$ would decrease which is key to improve $P(cancer|positive)$ because 99.9% of the population do not have cancer, which gives this probability a large weight in the computation.
+
+# Exercise 4) Bayes' theorem
 ## a)
-
-Subtasks in each assignments should be numbered and use header 2 (two ##). 
-
-We can easily add R code as chunks in the following way:
+The probability of picking a red ball is computed as 
+\begin{align}
+P(red) & = P(A)*P(red|A)+ P(B)*P(red|B)+P(C)*P(red|C)\\
+& = 0.5*\frac{2}{2+5}+0.1*\frac{4}{4+1}+0.5*\frac{1}{1+3}\\
+& = 0.3193
+\end{align}
 
 ```{r}
-5 + 5
+boxes <- matrix(c(2,4,1,5,1,3), ncol = 2,
+                dimnames = list(c("A", "B", "C"), c("red", "white")))
+boxes
+p_red <- function(boxes) {
+  p_A <- 0.4
+  p_B <- 0.1
+  p_C <- 0.5
+  p <- p_A*boxes[1,1]/sum(boxes[1,]) + p_B*boxes[2,1]/sum(boxes[2,]) + p_C*boxes[3,1]/sum(boxes[3,])
+  return(p)
+}
+p_red(boxes = boxes)
 ```
+## b)
+To know the most probable box a red ball would be picked from, we need to compute
 
-# Plots
+* $P(A|red)=\dfrac{P(A)*P(red|A)}{P(red)}$, 
+* $P(B|red)=\dfrac{P(B)*P(red|B)}{P(red)}$ and 
+* $P(C|red)=\dfrac{P(C)*P(red|C)}{P(red)}$.
 
-Include plots, where we can specify the width and height of the figure.
-
-```{r, fig.height=2, fig.width=3}
-data("drowning") # Access the data in aaltobda package
-plot(drowning$year, drowning$drownings, type = "l")
+The function definition would be the following
+```{r}
+p_box <- function(boxes) {
+  p_A <- 0.4
+  p_B <- 0.1
+  p_C <- 0.5
+  p_A.red <- p_A*boxes[1,1]/sum(boxes[1,])/p_red(boxes)
+  p_B.red <- p_B*boxes[2,1]/sum(boxes[2,])/p_red(boxes)
+  p_C.red <- p_C*boxes[3,1]/sum(boxes[3,])/p_red(boxes)
+  return(c(p_A.red, p_B.red, p_C.red))
+}
+p_box(boxes = boxes)
 ```
+Looking at the output of the function we can conclude that if a red ball was picked, it most probably came from box C.
 
-# Equations
+# Exercise 5) Bayes' theorem
+We know that $P(\text{identical twins})=\dfrac{1}{150}$, $P(\text{fraternal twins})=\dfrac{1}{400}$ and $P(\text{male})=P(\text{female})=0.5$.
+Then, we can compute
+$$P(\text{identical twins & twin brother})=P(\text{identical twins}) *P(\text{male twins | identical twins})$$
+and 
+$$P(\text{fraternal twins & twin brother})=P(\text{fraternal twins}) *P(\text{male twins | fraternal twins}).$$
 
-Equations should be correctly formated using LaTeX or being included as images if, for example, Microsoft Equations is used. 
+Knowing this, we can obtain the probability of Elvis being an identical twin given that he had a twin brother by
+$$P(\text{identical twins | twin brother})=\dfrac{P(\text{identical twins & twin brother})}{P(\text{twin brother})}$$
 
-In Markdown, equations can easily be formulated using LaTeX in line as $f(k) = {n \choose k} p^{k} (1-p)^{n-k}$ or use the math environment as follows:
-
-$$\begin{array}{ccc}
-x_{11} & x_{12} & x_{13}\\
-x_{21} & x_{22} & x_{23}
-\end{array}$$
-
-If you are new to LaTeX equations, you could use the [latext4technics](https://www.latex4technics.com/) equation editor to create LaTeX equations to include in the report.
-
-More information on using LaTeX in R markdown can be found in 2.5.3 in [R Markdown: The Definite Guide](https://bookdown.org/yihui/rmarkdown/).
-
-A short introduction to equations in LaTeX can be found [here](https://www.overleaf.com/learn/latex/Mathematical_expressions).
-
-# Language
-
-The language used in the course is English. Hence the report needs to be written in English.
-
-# Jupyter Notebook and other report formats
-You are allowed to use any format to produce your report, such as Jupyter Notebook, as long as you obide by the instructions in this template.
-
+This can be computed in R as
+```{r}
+p_identical_twin <- function(fraternal_prob, identical_prob) {
+  p_it.and.tb <- identical_prob * 0.5
+  p_ft.and.tb <- fraternal_prob * 0.5 * 0.5
+  return(p_it.and.tb/(p_it.and.tb + p_ft.and.tb))
+}
+p_identical_twin(fraternal_prob = 1/150, identical_prob = 1/400)
+```
+Thus, there is a 42.86% probability that Elvis was an identical twin.
