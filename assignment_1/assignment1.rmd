@@ -1,9 +1,15 @@
 ---
+title: "BDA - Assignment 1"
+author: "Anonymous"
 output:
-  html_document: default
-  pdf_document: default
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
 ---
-
 ```{r setup, include=FALSE}
 # This chunk just sets echo = TRUE as default (i.e. print all code)
 knitr::opts_chunk$set(echo = TRUE)
@@ -57,7 +63,10 @@ As we can see both values are approximately the same as the true values (i.e. $\
 Central 95% probability interval of the distribution from the
 drawn samples
 ```{r}
-print(paste("The central 95% probability interval of the distribution from the drawn samples is", format(quantile(sample, probs = 0.95))))
+lower <- quantile(sample, probs = 0.025)
+upper <- quantile(sample, probs = 0.975)
+print(paste("The central 95% probability interval of the distribution from the drawn samples"))
+print(paste("is [", format(lower), ",", format(upper), "]"))
 ```
 
 # Exercise 3) Bayes' theorem
@@ -132,12 +141,12 @@ Looking at the output of the function we can conclude that if a red ball was pic
 # Exercise 5) Bayes' theorem
 We know that $P(\text{identical twins})=\dfrac{1}{150}$, $P(\text{fraternal twins})=\dfrac{1}{400}$ and $P(\text{male})=P(\text{female})=0.5$.
 Then, we can compute
-$$P(\text{identical twins & twin brother})=P(\text{identical twins}) *P(\text{male twins | identical twins})$$
+$$P(\text{identical twins \& twin brother})=P(\text{identical twins}) *P(\text{male twins | identical twins})$$
 and 
-$$P(\text{fraternal twins & twin brother})=P(\text{fraternal twins}) *P(\text{male twins | fraternal twins}).$$
+$$P(\text{fraternal twins \& twin brother})=P(\text{fraternal twins}) *P(\text{male twins | fraternal twins}).$$
 
 Knowing this, we can obtain the probability of Elvis being an identical twin given that he had a twin brother by
-$$P(\text{identical twins | twin brother})=\dfrac{P(\text{identical twins & twin brother})}{P(\text{twin brother})}$$
+$$P(\text{identical twins | twin brother})=\dfrac{P(\text{identical twins \& twin brother})}{P(\text{twin brother})}$$
 
 This can be computed in R as
 ```{r}
