@@ -2,13 +2,13 @@
 title: "BDA - Assignment 2"
 author: "Anonymous"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: 2
   html_document:
     df_print: paged
     toc: yes
     toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: 2
 ---
 
 ```{r setup, include=FALSE}
