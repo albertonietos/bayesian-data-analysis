@@ -312,7 +312,7 @@ mu <- function (data) {
   s2 <- var(data)
   scale <- s2 / n
 
-  return (rtnew(100000, df, mean = mean, scale = scale))
+  return (rtnew(100000, df, mean = mean, scale = sqrt(scale)))
 }
 mu_1 <- mu(windshieldy1)
 mu_2 <- mu(windshieldy2)
@@ -338,7 +338,7 @@ The histogram is plotted here
 hist(mu_1-mu_2)
 ```
 
-Given the priors that were chosen, the point estimate for $\mu_d$ is $-1.21$ with 95% posterior intervals $[-1.78 -0.63]$.
+Given the priors that were chosen, the point estimate for $\mu_d$ is $-1.21$ with 95% posterior intervals $-2.44, 0.04]$.
 
 ## b)
 Assuming the priors $p_1$ and $p_2$, there is more than a 95% probability that the means are different as the posterior intervals show.
