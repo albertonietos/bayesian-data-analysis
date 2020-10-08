@@ -10,15 +10,18 @@ output:
     toc: yes
     toc_depth: '2'
 ---
+
 ```{r setup, include=FALSE}
 # This chunk just sets echo = TRUE as default (i.e. print all code)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Exercise 1) Inference for normal mean and deviation
+
 ## a)
-The data to be used in this assignment is `windshieldy1`.
-This data includes the values for the observed hardness values $y_1$ of a sample of windshields.
+
+The data to be used in this assignment is `windshieldy1`. This data includes the values for the observed hardness values $y_1$ of a sample of windshields.
+
 ```{r}
 library(aaltobda)
 data("windshieldy1")
@@ -26,11 +29,13 @@ head(windshieldy1)
 ```
 
 Here, we have some test samples to check the correctness of our results against some given tests.
-````{r}
+
+```{r}
 windshieldy_test <- c(13.357, 14.928, 14.896, 14.820)
 ```
 
 The sufficient statistics for this data are
+
 ```{r}
 n <- length(windshieldy1)
 y <- sum(windshieldy1)
@@ -38,20 +43,14 @@ s2 <- var(windshieldy1)
 my <- mean(windshieldy1)
 ```
 
-We assume the data to be normally distributed $\text{N}(\mu, \sigma^2)$ with an unknown standard deviation $\sigma$ and an unknown average hardness $\mu$.
-Assuming prior independence of location and scale parameters, we know that the prior distribution is
-$$p(\mu, \sigma^2)\propto (\sigma^2)^{-1}.$$
-The likelihood can be infered to be 
-$${\displaystyle {\begin{aligned}p(y \mid \mu ,\sigma ^{2})&=\left({\frac {1}{2\pi \sigma ^{2}}}\right)^{n/2}\exp \left(-{\frac {1}{2\sigma ^{2}}}\sum _{i=1}^{n}(y_{i}-\mu )^{2}\right)\end{aligned}}}.$$
-Under the aforementioned prior, the joint posterior distribution is proportional to the likelihood function, resulting in
-$${\displaystyle {\begin{aligned}p(\mu ,\sigma ^{2} \mid y)&=\sigma^{-n-2}\exp \left(-{\frac {1}{2\sigma ^{2}}}[(n-1)s^2+n(\bar{y}-\mu)^2]\right)\end{aligned}}}.$$
+We assume the data to be normally distributed $\text{N}(\mu, \sigma^2)$ with an unknown standard deviation $\sigma$ and an unknown average hardness $\mu$. Assuming prior independence of location and scale parameters, we know that the prior distribution is $$p(\mu, \sigma^2)\propto (\sigma^2)^{-1}.$$ The likelihood can be inferred to be $${\displaystyle {\begin{aligned}p(y \mid \mu ,\sigma ^{2})&=\left({\frac {1}{2\pi \sigma ^{2}}}\right)^{n/2}\exp \left(-{\frac {1}{2\sigma ^{2}}}\sum _{i=1}^{n}(y_{i}-\mu )^{2}\right)\end{aligned}}}.$$ Under the aforementioned prior, the joint posterior distribution is proportional to the likelihood function, resulting in $${\displaystyle {\begin{aligned}p(\mu ,\sigma ^{2} \mid y)&=\sigma^{-n-2}\exp \left(-{\frac {1}{2\sigma ^{2}}}[(n-1)s^2+n(\bar{y}-\mu)^2]\right)\end{aligned}}}.$$
 
-Since we are interested in estimating $\sigma$, we can derive the analytical form for the marginal posterior distribution of $\mu$ by integrating the joint posterior density over $\sigma^2$
-$$p(\mu \mid y)=\int_{0}^{\infty}p(\mu ,\sigma ^{2} \mid y)d\sigma^2.$$
+Since we are interested in estimating $\sigma$, we can derive the analytical form for the marginal posterior distribution of $\mu$ by integrating the joint posterior density over $\sigma^2$ $$p(\mu \mid y)=\int_{0}^{\infty}p(\mu ,\sigma ^{2} \mid y)d\sigma^2.$$
 
 The result of this is an unnormalized gamma integral, which gives that the posterior follows the standard $t$ density $p(\mu \mid y)\sim t_{n-1}(\bar{y}, s^2/n)$ with $n-1$ degrees of freedom.
 
 Based on the formulation of the prior, the model likelihood and the resulting posterior, we can obtain our estimates for $\mu$
+
 ```{r}
 mu_point_est <- function(data) {
   n <- length(data)
@@ -66,9 +65,11 @@ mu_point_est <- function(data) {
 }
 mu_point_est(data = windshieldy1)
 ```
-Thus, $E(\mu \mid y)=14.61$ (result may change slightly due to the randomness in the simulation). 
+
+Thus, $E(\mu \mid y)=14.61$ (result may change slightly due to the randomness in the simulation).
 
 The 95% posterior interval can be found as follows.
+
 ```{r}
 mu_interval <- function(data, prob) {
   n <- length(data)
@@ -88,9 +89,11 @@ mu_interval <- function(data, prob) {
   }
   mu_interval(data = windshieldy1, prob = 0.95)
 ```
-The 95% posterior interval is $[14.0531, 15.17]$. 
+
+The 95% posterior interval is $[14.0531, 15.17]$.
 
 The density function is seen in the next plot.
+
 ```{r, fig.height=3, fig.width=4}
 plot_density <- function(data){
   n <- length(data)
@@ -109,6 +112,7 @@ plot_density(windshieldy1)
 ```
 
 ## b)
+
 Next, we focus on the estimate for the hardness of the next windshield, that is, the posterior predictive distribution for a future observation.
 
 Based on derivations from BDA3, we know that the posterior predictive distribution of $\bar{y}$ is a $t$ distribution with location $\bar{y}$, scale $\left(1+\dfrac{1}{n}\right)^{1/2}s$, and $n - 1$ degrees of freedom.
@@ -129,9 +133,11 @@ mu_pred_point_est <- function(data) {
 }
 mu_pred_point_est(data = windshieldy1)
 ```
-Thus, $E(\mu \mid y)=14.61$. 
+
+Thus, $E(\mu \mid y)=14.61$.
 
 The 95% posterior interval can be found as follows.
+
 ```{r}
 mu_pred_interval <- function(data, prob) {
   n <- length(data)
@@ -151,9 +157,11 @@ mu_pred_interval <- function(data, prob) {
   }
   mu_pred_interval(data = windshieldy1, prob = 0.95)
 ```
+
 The 95% predictive interval is $[11.01 18.23]$. This interval is considerably wider than the one in Section 1.a.
 
 The density function is seen in the next plot.
+
 ```{r, fig.height=3, fig.width=4}
 plot_pred_density <- function(data){
   n <- length(data)
@@ -171,26 +179,19 @@ plot_pred_density <- function(data){
 plot_pred_density(windshieldy1)
 ```
 
-As was suspected from the predictive interval, this density function is much wider than the one seen before.
-Our confidence in this prediction is lower than in the previous.
-
+As was suspected from the predictive interval, this density function is much wider than the one seen before. Our confidence in this prediction is lower than in the previous.
 
 # Exercise 2) Inference for the difference between proportions
+
 ## a)
 
-We have an experiment with two groups: control and treatment.
-The probability of death with control is $p_0$ and the probability of death with the treatment is $p_1$.
+We have an experiment with two groups: control and treatment. The probability of death with control is $p_0$ and the probability of death with the treatment is $p_1$.
 
 We can set up a uniform prior distribution for both $p_0\sim\text{Beta}(1, 1)$ and $p_1\sim\text{Beta}(1, 1)$.
 
-The likelihood for both probabilities is $p(y_i|p_i)$ with $i=0,1$ is given by
-$$p(y_i|p_i)=\begin{pmatrix}n_i\\y_i\end{pmatrix}p_i^{y_i}(1-p_i)^{n_i-y_i}.$$
-Thus, the likelihoods are $p(y_0|p_0)= \text{Beta}(39,635)$ and $p(y_1|p_1)= \text{Beta}(22,658)$.
+The likelihood for both probabilities is $p(y_i|p_i)$ with $i=0,1$ is given by $$p(y_i|p_i)=\begin{pmatrix}n_i\\y_i\end{pmatrix}p_i^{y_i}(1-p_i)^{n_i-y_i}.$$ Thus, the likelihoods are $p(y_0|p_0)= \text{Beta}(39,635)$ and $p(y_1|p_1)= \text{Beta}(22,658)$.
 
-The posterior density for $p_i$ with $i=0,1$ is
-$$p(p_i|y)=\text{Beta}(p_i|\alpha+y, \beta+n-y).$$
-based on the derivation of the posterior in p.35 of the BDA3.
-Therefore, the resulting posteriors are $p(p_0|y)=\text{Beta}(p_0|40, 636)$ and $p(p_1|y)=\text{Beta}(p_1|23, 659)$.
+The posterior density for $p_i$ with $i=0,1$ is $$p(p_i|y)=\text{Beta}(p_i|\alpha+y, \beta+n-y).$$ based on the derivation of the posterior in p.35 of the BDA3. Therefore, the resulting posteriors are $p(p_0|y)=\text{Beta}(p_0|40, 636)$ and $p(p_1|y)=\text{Beta}(p_1|23, 659)$.
 
 ```{r}
 p0 <- rbeta(100000, 40, 636)
@@ -223,6 +224,7 @@ posterior_odds_ratio_interval(p0 = p0, p1 = p1, prob = 0.95)
 ```
 
 The histogram is seen in the next plot.
+
 ```{r, fig.height=3, fig.width=4}
 num <- p1 / (1 - p1)
 den <- p0 / (1 - p0)
@@ -230,13 +232,10 @@ odds_ratio <- num / den
 hist(odds_ratio)
 ```
 
-The two prior distributions were chosen so that it is equally likely that the treatment is effective as it is not.
-The point estimate for posterior distribution of the odds ratio is 0.57 and the 0.95 posterior interval is [0.32, 0.93].
-Assuming priors $p_0$ and $p_1$, there is a 95% probability that the true treatment effect is in the interval [0.32, 0.93].
-Furthermore, there is a 57% probability that the treatment results are different from those in the control group.
-
+The two prior distributions were chosen so that it is equally likely that the treatment is effective as it is not. The point estimate for posterior distribution of the odds ratio is 0.57 and the 0.95 posterior interval is [0.32, 0.93]. Assuming priors $p_0$ and $p_1$, there is a 95% probability that the true treatment effect is in the interval [0.32, 0.93]. Furthermore, there is a 57% probability that the treatment results are different from those in the control group.
 
 The posterior density functions for $p_0$ and $p_1$ can be seen below.
+
 ```{r, fig.height=3, fig.width=4}
 n_0 <- 674
 y_0 <- 39
@@ -257,6 +256,7 @@ lines(x, density_1, type = "l", col = "green")
 legend("topright", legend = c("Control", "Treatment"),
        col = c("blue", "green"), lty = 1, cex = 0.8)
 ```
+
 ## b)
 
 ```{r, fig.height=5, fig.width=7}
@@ -285,24 +285,18 @@ legend("topright", legend = c("p0 w/ Beta(1,1)", "p1 w/ Beta(1,1)", "p0 w/ Beta(
 title("Posterior distributions for p0 and p1 for different choice of priors")
 ```
 
-We can see the results with different priors are plotted in different colors.
-In this case, the posterior distributions for $p_0$ and $p_1$ do not seem to be very sensitive to the choice of prior.
-Thus, the uniform prior seems to be a sensible choice for this case given the amount of data we have.
+We can see the results with different priors are plotted in different colors. In this case, the posterior distributions for $p_0$ and $p_1$ do not seem to be very sensitive to the choice of prior. Thus, the uniform prior seems to be a sensible choice for this case given the amount of data we have.
 
 # Exercise 3) Inference for the difference between normal means
+
 ## a)
 
-In this case, there are two production lines with hardness measurements $y_1$ and $y_2$ as oppose to the one in exercise one.
-The prior, likelihood and posterior follow the same distributions as in Exercise 1.
+In this case, there are two production lines with hardness measurements $y_1$ and $y_2$ as oppose to the one in exercise one. The prior, likelihood and posterior follow the same distributions as in Exercise 1.
 
-The prior distribution is
-$$p(\mu_i, \sigma_i^2)\propto (\sigma_i^2)^{-1}$$
-with $i=1,2$.
-The likelihood can be infered to be 
-$${\displaystyle {\begin{aligned}p(y_i \mid \mu_i ,\sigma_i ^{2})&=\left({\frac {1}{2\pi \sigma_i ^{2}}}\right)^{n/2}\exp \left(-{\frac {1}{2\sigma_i ^{2}}}\sum _{j=1}^{n}(y_{i}^{j}-\mu_i )^{2}\right)\end{aligned}}}.$$
-The posterior follows the standard $t$ density $p(\mu_i \mid y_i)\sim t_{n_i-1}(\bar{y_i}, s_i^2/n_i)$ with $n_i-1$ degrees of freedom.
+The prior distribution is $$p(\mu_i, \sigma_i^2)\propto (\sigma_i^2)^{-1}$$ with $i=1,2$. The likelihood can be infered to be $${\displaystyle {\begin{aligned}p(y_i \mid \mu_i ,\sigma_i ^{2})&=\left({\frac {1}{2\pi \sigma_i ^{2}}}\right)^{n/2}\exp \left(-{\frac {1}{2\sigma_i ^{2}}}\sum _{j=1}^{n}(y_{i}^{j}-\mu_i )^{2}\right)\end{aligned}}}.$$ The posterior follows the standard $t$ density $p(\mu_i \mid y_i)\sim t_{n_i-1}(\bar{y_i}, s_i^2/n_i)$ with $n_i-1$ degrees of freedom.
 
 The point estimate for $\mu_d=\mu_1-\mu_2$ is
+
 ```{r}
 mu <- function (data) {
   n <- length(data)
@@ -322,6 +316,7 @@ mu_d_est
 ```
 
 The 95% posterior interval is
+
 ```{r}
 prob <- 0.95
 
@@ -334,6 +329,7 @@ upper <- 1-lower
 ```
 
 The histogram is plotted here
+
 ```{r, fig.height=3, fig.width=4}
 hist(mu_1-mu_2)
 ```
@@ -341,15 +337,5 @@ hist(mu_1-mu_2)
 Given the priors that were chosen, the point estimate for $\mu_d$ is $-1.21$ with 95% posterior intervals $-2.44, 0.04]$.
 
 ## b)
-Assuming the priors $p_1$ and $p_2$, there is more than a 95% probability that the means are different as the posterior intervals show.
-Given that the upper value of the interval is inferior to 0, it is very likely that the values of the means differ.
 
-
-
-
-
-
-
-
-
-
+Assuming the priors $p_1$ and $p_2$, there is more than a 95% probability that the means are different as the posterior intervals show. Given that the upper value of the interval is inferior to 0, it is very likely that the values of the means differ.
