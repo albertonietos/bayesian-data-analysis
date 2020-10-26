@@ -1,0 +1,102 @@
+---
+title: "BDA - Assignment 6"
+author: "Anonymous"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+# This chunk just sets echo = TRUE as default (i.e. print all code)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Import some useful libraries
+
+```{r, warning=FALSE}
+library(aaltobda)
+library(rstan)
+library(bayesplot)
+
+# rstan options
+options(mc.cores = parallel::detectCores())
+rstan_options(auto_write = TRUE)
+
+# Import the data
+data("bioassay")
+```
+
+# Generalized linear model: Bioassay with Stan
+
+## Exercise 1
+
+In this exercise, we model a dose-response relation for the bioassay data using the Stan probabilistic programming language. 
+We assume a Gaussian prior distribution characterized by $$\begin{bmatrix}\alpha \\ \beta \end{bmatrix} \sim \text{N}(\boldsymbol {\mu}_0, \mathbf{\Sigma}_0), \,\, \text{where}\,\, \boldsymbol{\mu}_0=\begin{bmatrix}0 \\ 10 \end{bmatrix}
+\,\,\text{and}\,\,\mathbf{\Sigma}_0 = \begin{bmatrix}2^2 & 10 \\ 10 & 10^2 \end{bmatrix}.$$
+
+The model is built in Stan as follows
+```{r}
+code_bioassay <- "bioassay_model.stan"
+writeLines(readLines(code_bioassay))
+```
+Now, we can prepare the data in R with
+```{r}
+bioassay_data <- list(N = length(bioassay$x),
+                      x = bioassay$x,
+                      n = bioassay$n,
+                      y = bioassay$y,
+                      mu = c(0, 10),
+                      Sigma = matrix(data = c(4, 10, 10, 100), nrow = 2, ncol = 2))
+```
+
+Then, we can get a fit with the following R command and sample from the posterior distribution.
+```{r}
+max_iters <- 2000
+n_chains <- 5
+fit <- stan(file = 'bioassay_model.stan', data = bioassay_data, chains = n_chains, 
+            iter = max_iters, warmup = floor(max_iters/2))
+```
+
+## Exercise 2
+In order to check the convergence of the chains, we can use `stan::monitor` to compute $\hat{R}$ and other convergence analytics.
+$\hat{R}$ is an indicator of the between- and within-chain variance of the estimates. If the between- or within-chain estimates are generally not agreeing, we will get a larger value. A larger value thus tells that we should continue with further simulations to improve our inference of the target distribution. If the value of $\hat{R}$ is less than $1.05$, it is considered safe to use the sample.
+
+```{r}
+monitor(fit)
+```
+As we can see, $\alpha$ (i.e. `theta[1]`) and $\beta$ (i.e. `theta[2]`) both have an $\hat{R}_\alpha=\hat{R}_\beta=1$.
+Both results are below $1.05$, which means that we can accept the sample as the chains have converged.
+
+## Exercise 3
+
+Here, we plot the draws from $\alpha$ and $\beta$ in a scatter plot to compare the results with Figure 3.3b in BDA3.
+The x- and y-axis limits are adjusted to capture the same grid as in the book figure.
+
+```{r, fig.width=5, fig.height=5}
+p <- mcmc_scatter(fit, pars = c('theta[1]', 'theta[2]'), alpha = 0.2)
+(p + labs(title = "Scatter plot of alpha and beta draws",
+         x = expression(alpha),
+         y = expression(beta)) + stat_density_2d(color = "black", size = .5) 
+  + xlim(-4, 10) + ylim(-10, 40))
+```
+
+All in all, the results look quite similar with some slight difference due to the different choice of prior (uniform prior compared to Gaussian).
+
+## Exercise 4
+
+This exercise has been written and compiled in Windows using R and the package `Rstan`.
+I had some installation issues in the beginning since I did not follow the instructions of installing the `Rstan` from source as I had already used it in the previous assignment.
+The problems disappeared when I followed the instructions.
+I thought about using Aalto's jupyter when I run into problems, but I resolved those problems locally in the end.
+
+The hardest part about the assignment was getting the hang of Stan syntax and how the model is defined.
+I believe this will get easier with practice.
+
+
+
+
